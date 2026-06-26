@@ -1,7 +1,7 @@
 # Skribblz — a skribbl.io Clone
 
 A real-time multiplayer drawing & guessing game (pictionary-style), built with Node.js, Express,
-Socket.IO, and vanilla JS + HTML5 Canvas.
+Socket.IO, and vanilla JS + react
 
 **Live URL:** _add your deployed URL here after deploying, e.g. `https://your-skribbl-clone.onrender.com`_
 
@@ -94,6 +94,7 @@ Socket.IO WebSocket endpoint — so it deploys cleanly to any platform with WebS
 on a single service. **Render** or **Railway** are the simplest:
 
 ### Deploy to Render
+
 1. Push this repo to GitHub.
 2. On Render: **New → Web Service** → connect the repo.
 3. Build command: `npm install && npm run build` (installs backend deps, then builds the React client into `client/dist`)
@@ -102,11 +103,13 @@ on a single service. **Render** or **Railway** are the simplest:
 6. Once deployed, your live URL will be `https://<your-service-name>.onrender.com`.
 
 ### Deploy to Railway
+
 1. Push to GitHub, then **New Project → Deploy from GitHub repo** on Railway.
 2. Set build command to `npm install && npm run build` and start command to `npm start`.
 3. Railway provides a public URL automatically with WebSocket support enabled.
 
 ### Vercel / Netlify note
+
 Vercel and Netlify's serverless functions don't support persistent WebSocket connections (which
 this app needs for Socket.IO), so they're not suitable for the combined frontend+backend
 deployment used here. If you want to use Vercel/Netlify anyway, you'd need to split the app —
@@ -119,13 +122,15 @@ After deploying, **update the "Live URL" line at the top of this README** with y
 ## Architecture overview
 
 ### WebSocket event flow
-Socket.IO is used for *all* real-time communication — room/lobby events, game-state transitions,
+
+Socket.IO is used for _all_ real-time communication — room/lobby events, game-state transitions,
 drawing strokes, and chat/guesses all flow over the same persistent connection per client.
 `server/index.js` registers one `io.on("connection", socket => {...})` handler that wires every
 event listed in the assignment's event table (`create_room`, `join_room`, `draw_start/move/end`,
 `guess`, etc.) to methods on the relevant `Room` / `Game` instance.
 
 ### How drawing strokes are captured, sent, and rendered
+
 - On the drawer's canvas, `mousedown`/`touchstart` fires `draw_start` with `{x, y, color, size}`;
   `mousemove`/`touchmove` fires `draw_move` with just `{x, y}` (color/size are resent too, for
   resilience); `mouseup` fires `draw_end`.
@@ -141,8 +146,9 @@ event listed in the assignment's event table (`create_room`, `join_room`, `draw_
   from history and the server tells clients to redraw from the remaining history.
 
 ### How game state (rounds, turn order, scoring) is managed
+
 - `Game` (in `Game.js`) is the state machine: phases are `lobby → choosing_word → drawing →
-  round_end → (repeat) → game_over`.
+round_end → (repeat) → game_over`.
 - `turnOrder` is a fixed array of player IDs snapshotted at game start; `turnIndex` walks through
   it, wrapping around and incrementing `round` each time it wraps, until `round > settings.rounds`.
 - Disconnected players are skipped in turn rotation but keep their score (in case they reconnect).
@@ -153,12 +159,14 @@ event listed in the assignment's event table (`create_room`, `join_room`, `draw_
 - Hints reveal one random unrevealed letter at evenly spaced intervals based on `settings.hints`.
 
 ### Word-matching logic
+
 Implemented in `Game.checkGuess()`: both strings are `.trim().toLowerCase()` and have internal
 whitespace collapsed to single spaces before an exact-match comparison — so trailing spaces,
 casing, or double-spacing don't cause a false negative. (Partial-credit/fuzzy matching was left
 as a possible extension — see below.)
 
 ### Deployment setup & platform constraints
+
 The app is a single Express + Socket.IO server, so it needs a host that keeps a long-lived
 process with WebSocket support (Render/Railway, not Vercel/Netlify serverless functions — see the
 deployment note above). `server/index.js` binds to `process.env.PORT` so it works on any of these
@@ -180,6 +188,7 @@ implemented. Kick/ban, votekick, and multi-language word lists are not implement
 as extensions.
 
 ## Possible extensions (not yet implemented)
+
 - Persistence (PostgreSQL/SQLite) for accounts, historical scores, and custom word lists
 - Host moderation: kick / ban / votekick
 - Word categories selectable in room settings UI
@@ -188,6 +197,7 @@ as extensions.
 - Avatars
 
 ## Code walkthrough readiness
+
 The codebase intentionally mirrors the assignment's bonus "OOP for WebSocket servers" suggestion:
 `Player`, `Room`, `Game`, and `RoomManager` are plain classes with single responsibilities, and
 `server/index.js` acts as the `MessageHandler` — it only wires socket events to method calls on
