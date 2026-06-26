@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Skribblz - Draw & Guess</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- HOME SCREEN -->
+<div id="screen-home" class="screen active">
+  <div class="card home-card">
+    <h1>🎨 Skribblz</h1>
+    <p class="subtitle">Draw, guess, and have fun with friends!</p>
+
+    <input id="input-name" type="text" placeholder="Your nickname" maxlength="16" />
+
+    <div class="home-actions">
+      <button id="btn-create-room" class="btn primary">Create Room</button>
+      <div class="join-row">
+        <input id="input-room-code" type="text" placeholder="Room code" maxlength="8" />
+        <button id="btn-join-room" class="btn secondary">Join</button>
+      </div>
+    </div>
+
+    <div id="home-error" class="error-text"></div>
+  </div>
+</div>
+
+<!-- CREATE ROOM SETTINGS SCREEN -->
+<div id="screen-settings" class="screen">
+  <div class="card">
+    <h2>Room Settings</h2>
+    <div class="settings-grid">
+      <label>Max players
+        <input id="set-maxplayers" type="number" min="2" max="20" value="8" />
+      </label>
+      <label>Rounds
+        <input id="set-rounds" type="number" min="2" max="10" value="3" />
+      </label>
+      <label>Draw time (sec)
+        <input id="set-drawtime" type="number" min="15" max="240" value="80" />
+      </label>
+      <label>Word count
+        <input id="set-wordcount" type="number" min="1" max="5" value="3" />
+      </label>
+      <label>Hints
+        <input id="set-hints" type="number" min="0" max="5" value="2" />
+      </label>
+      <label class="checkbox-label">
+        <input id="set-private" type="checkbox" />
+        Private room
+      </label>
+    </div>
+    <div class="btn-row">
+      <button id="btn-back-home" class="btn secondary">Back</button>
+      <button id="btn-confirm-create" class="btn primary">Create</button>
+    </div>
+  </div>
+</div>
+
+<!-- LOBBY SCREEN -->
+<div id="screen-lobby" class="screen">
+  <div class="card lobby-card">
+    <h2>Room: <span id="lobby-room-code"></span> <button id="btn-copy-link" class="btn tiny">Copy invite link</button></h2>
+    <p class="lobby-meta" id="lobby-settings-summary"></p>
+
+    <div class="lobby-body">
+      <div class="player-list" id="lobby-player-list"></div>
+      <div class="lobby-side">
+        <p>Waiting for players...</p>
+        <button id="btn-ready" class="btn secondary">Ready Up</button>
+        <button id="btn-start-game" class="btn primary" style="display:none;">Start Game</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- GAME SCREEN -->
+<div id="screen-game" class="screen">
+  <div class="game-layout">
+    <div class="game-top-bar">
+      <div class="top-info">Round <span id="game-round">1</span>/<span id="game-total-rounds">3</span></div>
+      <div class="top-word" id="game-word-display">_ _ _ _</div>
+      <div class="top-timer" id="game-timer">--</div>
+    </div>
+
+    <div class="game-main">
+      <div class="player-sidebar" id="game-player-list"></div>
+
+      <div class="canvas-area">
+        <div id="word-choice-overlay" class="overlay hidden">
+          <div class="overlay-card">
+            <h3>Choose a word to draw</h3>
+            <div id="word-choice-buttons" class="word-choice-buttons"></div>
+          </div>
+        </div>
+
+        <div id="round-end-overlay" class="overlay hidden">
+          <div class="overlay-card">
+            <h3>The word was: <span id="round-end-word"></span></h3>
+            <p>Next round starting soon...</p>
+          </div>
+        </div>
+
+        <div id="game-over-overlay" class="overlay hidden">
+          <div class="overlay-card">
+            <h3>🏆 Game Over!</h3>
+            <p id="game-over-winner"></p>
+            <ol id="game-over-leaderboard"></ol>
+            <button id="btn-back-to-home" class="btn primary">Back to Home</button>
+          </div>
+        </div>
+
+        <canvas id="draw-canvas" width="800" height="600"></canvas>
+
+        <div class="toolbar" id="toolbar">
+          <div class="colors" id="color-palette"></div>
+          <input type="range" id="brush-size" min="2" max="40" value="6" />
+          <button id="btn-eraser" class="tool-btn" title="Eraser">🧽</button>
+          <button id="btn-undo" class="tool-btn" title="Undo">↩️</button>
+          <button id="btn-clear" class="tool-btn" title="Clear canvas">🗑️</button>
+        </div>
+      </div>
+
+      <div class="chat-panel">
+        <div class="chat-messages" id="chat-messages"></div>
+        <form id="chat-form">
+          <input id="chat-input" type="text" placeholder="Type your guess..." autocomplete="off" />
+          <button type="submit" class="btn primary">Send</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="client.js"></script>
+</body>
+</html>
